@@ -1,8 +1,10 @@
 const express = require("express");
+const fs = require('fs')
 const users = require("./MOCK_DATA.json");
 
 const app= express();
 const PORT =8000;
+app.use(express.urlencoded({extended: false}));
 //Routes
 app.get('/users',(req,res)=>{
     const html =`
@@ -20,14 +22,30 @@ app.route('/api/users/:id').get((req,res)=>{
     const user = users.find((user)=> user.id ===id);
     return res.json(user);
 }).put((req,res)=>{
-    return res.json({status:"Pending"});
-})
-.delete((req,res)=>{
-    return res.json({status:"Pending"});
+    const body = req.body;
+    const id=body.id;
+    users=users.map(user=>user.id===id?{...user,...body}:user);
+    fs.writeFile('./MOCK_DATA.json',JSON.stringify(users),(err)=>{
+        return res.json({status:"success",id});
+    });
+    
+}).delete((req,res)=>{
+    const id=req.body.id;
+    users=users.filter(user=>user.id!==id);
+    fs.writeFile('./MOCK_DATA.json',JSON.stringify(users),(err)=>{
+        return res.json({status:"success",id});
+    });
 });
 
+
 app.post('/api/users',(req,res)=>{
-    return res.json({status:"pending"});
+    const body = req.body;
+    users.push({...body,id:users.length+1});
+    fs.writeFile('./MOCK_DATA.json',JSON.stringify(users),(err,data)=>{
+        return res.json({status:"success",id:users.length});
+    });
+    //console.log("Body",body);
+    
 });
 
 
