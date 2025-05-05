@@ -4,7 +4,24 @@ const users = require("./MOCK_DATA.json");
 
 const app= express();
 const PORT =8000;
+//Middleware -plugin
 app.use(express.urlencoded({extended: false}));
+app.use((req,res,next)=>{
+    fs.appendFile(
+        "log.txt",
+        `${Date.now()}:${req.ip}${req.method}:${req.path}`,
+        (err,data)=>{
+            next();
+        }
+    );
+}); 
+app.use((req,res,next)=>{
+    console.log("hello from middleware 2");
+    
+    next();
+});
+
+
 //Routes
 app.get('/users',(req,res)=>{
     const html =`
